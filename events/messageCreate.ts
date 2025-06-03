@@ -1,14 +1,34 @@
-import { Client, Message } from 'discord.js';
+import { Events, Message } from 'discord.js';
 import ArgTokenizer from '../utils/ArgTokenizer';
+import { ClientWithExtendedTypes } from '../types/types';
 
 const messageCreate = {
-  name: 'messageCreate',
-  prefix: '!mafia',
+  name: Events.MessageCreate,
   once: false,
-  async execute(client: Client, msg: Message) {
+  execute: async function (client: ClientWithExtendedTypes, prefix: string, msg: Message) {
     if (msg.author.bot) return;
+    if (!msg.guild) return;
+
     const msgTokens = ArgTokenizer(msg);
-    if (msgTokens[0] !== this.prefix) return;
+    if (!msgTokens[0] || msgTokens[0] !== prefix) return;
+
+    // Get the command name (second token after prefix)
+    const commandName = msgTokens[1];
+    if (!commandName) return;
+
+    // Try to execute the command if it exists
+    const command = client.messageCommands.get(commandName);
+    if (!command) {
+      console.log(`Command not found: ${commandName}`);
+      return;
+    }
+
+    try {
+      await command.execute(client, msg);
+    } catch (error) {
+      console.error(`Error executing command ${commandName}:`, error);
+      await msg.reply('There was an error executing that command.');
+    }
   },
 };
 

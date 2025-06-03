@@ -1,8 +1,8 @@
-import { db } from '../database';
-import GuildSettingsSchema from '../database/schemas/GuildSettingsSchema';
-import { GuildConfig } from '../types/types';
-import { GAME_GUILD_SETTINGS_DEFAULTS } from '../constants/constants';
-import { eq } from 'drizzle-orm';
+import { db } from '../../database';
+import GuildSettingsSchema from '../../database/schemas/GuildSettingsSchema';
+import { GuildConfig } from '../../types/types';
+import { GAME_GUILD_SETTINGS_DEFAULTS } from '../../constants/constants';
+import { eq, InferSelectModel } from 'drizzle-orm';
 import { PostgresError } from 'postgres';
 
 export class SettingsManager {
@@ -15,17 +15,24 @@ export class SettingsManager {
   }
 
   private async loadFromDb() {
-    const [obj] = await db.select().from(GuildSettingsSchema).where(eq(GuildSettingsSchema.id, this.guildId)).limit(1);
-    this.guildConfig = obj.config ?? GAME_GUILD_SETTINGS_DEFAULTS;
-    if (obj.config) return;
-    try {
-      await db.insert(GuildSettingsSchema).values({
-        id: this.guildId,
-        config: this.guildConfig,
-      });
-    } catch (err) {
-      if (err instanceof PostgresError) {
-        console.error('An error occurred in settings manager, when creating a new guild settings', err.message);
+    
+    const obj: InferSelectModel<typeof GuildSettingsSchema> | undefined = (
+      await db.select().from(GuildSettingsSchema).where(eq(GuildSettingsSchema.id, this.guildId)).limit(1)
+    )[0];
+
+    if (obj?.config) {
+      this.guildConfig = obj.config;
+    } else {
+      this.guildConfig = GAME_GUILD_SETTINGS_DEFAULTS;
+      try {
+        await db.insert(GuildSettingsSchema).values({
+          id: this.guildId,
+          config: this.guildConfig,
+        });
+      } catch (err) {
+        if (err instanceof PostgresError) {
+          console.error('An error occurred in settings manager, when creating a new guild settings', err);
+        }
       }
     }
   }

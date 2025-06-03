@@ -4,14 +4,24 @@ import path from 'node:path';
 import { readdirSync } from 'fs';
 import { pathToFileURL } from 'node:url';
 import { ClientWithExtendedTypes } from './types/types';
+import ms from 'ms';
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
+  ],
+});
+
+const PREFIX = '!mafia';
 
 // We decide typescript's to initialize our client with it's states
 (client as ClientWithExtendedTypes).messageCommands = new Collection();
 
 // we need to read through all the events and the once which are once, init them, once which are on, init them.
-async function loadEvents() {
+async function loadAllEvents(client: Client) {
   const eventDirectory = readdirSync(pathToFileURL(path.join(__dirname, 'events')));
   for (const event of eventDirectory) {
     const obj = await import(pathToFileURL(path.join(__dirname, 'events', event)).href);
@@ -19,9 +29,13 @@ async function loadEvents() {
       default: { once, execute, name },
     } = obj;
     if (once) {
-      client.once(name, execute);
+      client.once(name, (...args) => execute(...args));
     } else {
-      client.on(name, (interaction) => execute(client, interaction));
+      try {
+        client.on(name, (...args) => execute(client, PREFIX, ...args));
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 }
@@ -43,7 +57,7 @@ async function loadAllCommands(cmdDir: string) {
       default: { name, description, execute },
     } = obj;
 
-    if (!name || description || execute) {
+    if (!name || !description || !execute) {
       console.log(
         `
 Sorry a command file found couldn't be loaded due to missing fields.
@@ -56,7 +70,6 @@ exec: ${execute ? 'defined' : 'undefined'}
     }
 
     (client as ClientWithExtendedTypes).messageCommands.set(name, {
-      name,
       description,
       execute,
     });
@@ -68,7 +81,13 @@ Description: ${description}
   }
 }
 
-loadEvents().then((r) => r);
-loadAllCommands(path.join(__dirname, 'commands')).then((r) => r);
+loadAllEvents(client).catch(console.error);
+loadAllCommands(path.join(__dirname, 'commands'))
+  .then((r) => r)
+  .catch(console.error);
 
-client.login(botConfigs.env.bot.token);
+client.login(botConfigs.env.bot.token).catch((err) => {
+  console.error('Error occurred while signing in', err);
+  console.log('Retrying in 30 seconds...');
+  setTimeout(() => client.login(botConfigs.env.bot.token), ms('30s'));
+});
