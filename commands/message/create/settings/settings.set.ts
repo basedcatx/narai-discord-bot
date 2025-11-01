@@ -1,9 +1,9 @@
 import { SETTINGS, SETTINGS_COMMANDS, TIMEOUTS } from '../../../../constants/constants';
 import { Message, Role } from 'discord.js';
 import { ClientWithExtendedTypes } from '../../../../types/types';
-import { SettingsManager } from '../../../../structures/settings/SettingsManager';
-import ArgTokenizer from '../../../../utils/ArgTokenizer';
-import GetAllMentionedRoles from '../../../../utils/GetAllMentionedRoles';
+import { SettingsManager } from '../../../../classes/SettingsManager';
+import ArgTokenizer from '../../../../utils/command_parsers/ArgTokenizer';
+import GetAllMentionedRoles from '../../../../utils/command_parsers/GetAllMentionedRoles';
 
 const command = {
   name: SETTINGS_COMMANDS.SETTINGS_SET.NAME,

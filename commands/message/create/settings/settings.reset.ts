@@ -1,9 +1,9 @@
 import { GAME_GUILD_SETTINGS_DEFAULTS, SETTINGS, SETTINGS_COMMANDS, TIMEOUTS } from '../../../../constants/constants';
 import { Message } from 'discord.js';
 import { ClientWithExtendedTypes } from '../../../../types/types';
-import ArgTokenizer from '../../../../utils/ArgTokenizer';
-import { SettingsManager } from '../../../../structures/settings/SettingsManager';
-import { SettingsResetEmbedClass } from '../../../../components/settings/settings.reset.embed';
+import ArgTokenizer from '../../../../utils/command_parsers/ArgTokenizer';
+import { SettingsManager } from '../../../../classes/SettingsManager';
+import { SettingsResetEmbedClass } from '../../../../components/embeds/settings/settings.reset.embed';
 
 const command = {
   name: SETTINGS_COMMANDS.SETTINGS_RESET.NAME,

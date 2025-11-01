@@ -1,13 +1,11 @@
-import { db } from '../../database';
-import GuildSettingsSchema from '../../database/schemas/GuildChannelSettingsSchema';
-import { GuildChannelConfig } from '../../types/types';
-import { GAME_GUILD_SETTINGS_DEFAULTS } from '../../constants/constants';
+import { db } from '../database';
+import GuildChannelSettingsSchema from '../database/schemas/GuildChannelSettingsSchema';
+import { GuildChannelConfig } from '../types/types';
+import { GAME_GUILD_CHANNEL_SETTINGS_DEFAULTS } from '../constants/constants';
 import { eq, InferSelectModel } from 'drizzle-orm';
-import { PostgresError } from 'postgres';
 
 export class SettingsManager {
-  // please note that although it is called guild config i decided that every config should be unique per channel, so it's more of a channel config. I would change this in my database. This would help for private lobbies.
-  private channelConfigs: GuildChannelConfig = GAME_GUILD_SETTINGS_DEFAULTS;
+  private channelConfigs: GuildChannelConfig = GAME_GUILD_CHANNEL_SETTINGS_DEFAULTS;
   private channelId: string;
 
   constructor(channelId: string) {
@@ -16,25 +14,20 @@ export class SettingsManager {
   }
 
   private async loadFromDb() {
-    const obj: InferSelectModel<typeof GuildSettingsSchema> | undefined = (
-      await db.select().from(GuildSettingsSchema).where(eq(GuildSettingsSchema.id, this.channelId)).limit(1)
+    const fetched: InferSelectModel<typeof GuildChannelSettingsSchema> | undefined = (
+      await db.select().from(GuildChannelSettingsSchema).where(eq(GuildChannelSettingsSchema.id, this.channelId)).limit(1)
     )[0];
 
-    if (obj?.config) {
-      this.channelConfigs = obj.config;
-    } else {
-      this.channelConfigs = GAME_GUILD_SETTINGS_DEFAULTS;
+    this.channelConfigs = fetched?.config || GAME_GUILD_CHANNEL_SETTINGS_DEFAULTS; 
+    if (this.channelConfigs === GAME_GUILD_CHANNEL_SETTINGS_DEFAULTS) {
       try {
-        await db.insert(GuildSettingsSchema).values({
-          id: this.channelId,
-          config: this.channelConfigs,
-        });
+        await db.insert(GuildChannelSettingsSchema).values({
+        id: this.channelId,
+        config: this.channelConfigs
+      })
       } catch (err) {
-        if (err instanceof PostgresError) {
-          console.error('An error occurred in settings manager, when creating a new guild settings', err);
-        }
-      }
-    }
+        console.error(`An error occurred trying to load channel ${this.channelId}`)
+      } 
   }
 
   private async updateDb() {

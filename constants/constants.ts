@@ -33,7 +33,7 @@ export const DURATIONS = {
   },
 };
 
-export const GAME_GUILD_SETTINGS_DEFAULTS: GuildChannelConfig = {
+export const GAME_GUILD_CHANNEL_SETTINGS_DEFAULTS: GuildChannelConfig = {
   admin: ['admin'],
   min: 5,
   max: 0,

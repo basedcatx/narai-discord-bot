@@ -1,5 +1,5 @@
 import { Events, Message } from 'discord.js';
-import ArgTokenizer from '../utils/ArgTokenizer';
+import ArgTokenizer from '../utils/command_parsers/ArgTokenizer';
 import { ClientWithExtendedTypes } from '../types/types';
 
 const messageCreate = {

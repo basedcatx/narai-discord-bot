@@ -111,3 +111,5 @@ client.login(botConfigs.env.bot.token).catch((err) => {
   console.log('Retrying in 30 seconds...');
   setTimeout(() => client.login(botConfigs.env.bot.token), ms('30s'));
 });
+
+export const botClient = client;
