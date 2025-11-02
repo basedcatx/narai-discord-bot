@@ -3,6 +3,7 @@ import GuildChannelSettingsSchema from '../database/schemas/GuildChannelSettings
 import { GuildChannelConfig } from '../types/types';
 import { GAME_GUILD_CHANNEL_SETTINGS_DEFAULTS } from '../constants/constants';
 import { eq, InferSelectModel } from 'drizzle-orm';
+import GuildSettingsSchema from '../database/schemas/GuildChannelSettingsSchema';
 
 export class SettingsManager {
   private channelConfigs: GuildChannelConfig = GAME_GUILD_CHANNEL_SETTINGS_DEFAULTS;
@@ -18,16 +19,17 @@ export class SettingsManager {
       await db.select().from(GuildChannelSettingsSchema).where(eq(GuildChannelSettingsSchema.id, this.channelId)).limit(1)
     )[0];
 
-    this.channelConfigs = fetched?.config || GAME_GUILD_CHANNEL_SETTINGS_DEFAULTS; 
+    this.channelConfigs = fetched?.config || GAME_GUILD_CHANNEL_SETTINGS_DEFAULTS;
     if (this.channelConfigs === GAME_GUILD_CHANNEL_SETTINGS_DEFAULTS) {
       try {
         await db.insert(GuildChannelSettingsSchema).values({
-        id: this.channelId,
-        config: this.channelConfigs
-      })
+          id: this.channelId,
+          config: this.channelConfigs,
+        });
       } catch (err) {
-        console.error(`An error occurred trying to load channel ${this.channelId}`)
-      } 
+        console.error(`An error occurred trying to load channel ${this.channelId}`, err);
+      }
+    }
   }
 
   private async updateDb() {

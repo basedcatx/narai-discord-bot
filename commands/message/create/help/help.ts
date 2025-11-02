@@ -14,7 +14,7 @@ const help = {
     // To avoid recursion we check if the prefix tokens are more than 2 eg !mafia settings add
     const redirectCommand =
       msgTokens.length < 3 ? null : client.messageCommands.get(msgTokens.splice(1, redirectCommandIndex + 1).join(' '));
-      const cHelpEmbed = new CHelpEmbed(client);
+    const cHelpEmbed = new CHelpEmbed(client);
 
     if (redirectCommand) {
       return redirectCommand.execute(client, msg);

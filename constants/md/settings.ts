@@ -1,4 +1,4 @@
-import { SettingsManager } from "../../classes/SettingsManager";
+import { SettingsManager } from '../../classes/SettingsManager';
 
 export const SETTINGS_EMBED_DESCRIPTION_MD = async (settingsManager: SettingsManager) => `
 * \`!mafia settings set <option> <value> \` - To modify any settings below (per guild)[overrides]
