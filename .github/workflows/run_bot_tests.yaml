@@ -30,7 +30,9 @@ jobs:
         working-directory: ./src
         run: pnpm install
 
+      - name: "Log running tests"
+        run: echo "Running tests"
+
       - name: "Run tests"
         working-directory: ./src
-        run: echo "Running tests..."
-          bun test
+        run: bun test
