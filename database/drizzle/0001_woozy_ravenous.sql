@@ -1,1 +1,0 @@
-ALTER TABLE "guild_settings" RENAME TO "guild_channel_settings";
