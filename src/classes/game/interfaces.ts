@@ -1,11 +1,10 @@
 import { GuildMember } from 'discord.js';
 import { GAME_ROLES_TYPE } from '../../types/types';
-import { ThreadChannelManager } from '../managers/ThreadChannelManager';
-import { TextChannelManager } from '../managers/TextChannelManager';
 import { Player } from './Player';
+import { ChannelManager } from '../managers/ChannelManager';
 
 export interface IPlayer {
-  readonly guildMember: GuildMember;
+  readonly member: GuildMember;
   readonly id: string;
   readonly username: string;
   role: GAME_ROLES_TYPE | undefined;
@@ -13,8 +12,8 @@ export interface IPlayer {
 }
 
 export interface Game {
-  lobbyChannel: TextChannelManager;
-  threadChannel: ThreadChannelManager;
+  lobbyChannel: ChannelManager;
+  threadChannel: ChannelManager;
   players: Player[];
   gameStarted: boolean;
   id: string;

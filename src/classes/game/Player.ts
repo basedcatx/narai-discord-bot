@@ -3,26 +3,30 @@ import { GAME_ROLES_TYPE } from '../../types/types';
 import { IPlayer } from './interfaces';
 
 export class Player implements IPlayer {
-  private readonly guildMember: GuildMember;
-  private role: GAME_ROLES_TYPE | undefined = undefined;
-  private isAlive: boolean = false;
+  private readonly member: GuildMember;
+  private playerRole: GAME_ROLES_TYPE | undefined = undefined;
+  isAlive: boolean = false;
 
   constructor(member: GuildMember) {
-    this.guildMember = member;
+    this.member = member;
   }
 
   public get username() {
-    return this.guildMember.displayName;
+    return this.member.displayName;
   }
 
   public setRole(role: GAME_ROLES_TYPE) {
-    if (this.role) return;
-    this.role = role;
+    if (this.playerRole) return;
+    this.playerRole = role;
     this.isAlive = true;
   }
 
+  public get role(): GAME_ROLES_TYPE | undefined {
+    return this.role;
+  }
+
   public get id() {
-    return this.guildMember.id;
+    return this.member.id;
   }
 
   public hasRole() {

@@ -1,4 +1,4 @@
-import { ChannelType } from 'discord.js';
+import { ChannelType, Client } from 'discord.js';
 
 /**
  * Defines the contract for the game's Channel Manager Object
@@ -8,8 +8,10 @@ export interface IChannelManager {
   readonly id: string;
   readonly name: string;
   readonly type: ChannelType;
+  hasThreadPermission(bot: Client): boolean;
   postSystemMessage(content: string): Promise<void>;
   isPostable(): boolean; // Either a channel is postable or archieved.
+  channelSupportThreads(): boolean;
 }
 
 export interface IGuildManager {

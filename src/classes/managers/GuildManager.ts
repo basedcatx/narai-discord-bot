@@ -1,7 +1,7 @@
 import { Client, Guild } from 'discord.js';
-import { GuildManagerContract } from './contracts/GuildManagerContract';
+import { IGuildManager } from './interfaces';
 
-export class GuildManager implements GuildManagerContract {
+export class GuildManager implements IGuildManager {
   private readonly guild: Guild;
 
   private constructor(guild: Guild) {

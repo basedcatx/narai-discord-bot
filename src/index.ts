@@ -1,4 +1,4 @@
-import { Client, REST, Collection, CommandInteraction, GatewayIntentBits, SlashCommandBuilder, Routes } from 'discord.js';
+import { Client, REST, Collection, GatewayIntentBits, Routes } from 'discord.js';
 import botConfigs from './config';
 import path from 'node:path';
 import { readdirSync } from 'fs';
@@ -15,23 +15,11 @@ const client = new Client({
   ],
 });
 
-// Dummy slash command, to keep my active developer badge
-
-const dummy_commands = {
-  data: new SlashCommandBuilder()
-    .setName('dummy_command')
-    .setDescription('This command is just to make sure i can retain my active developer role'),
-  async execute(interaction: CommandInteraction) {
-    await interaction.reply('Hello world, nice to see you.');
-  },
-};
-
-const commands = [{ ...dummy_commands.data.toJSON() }];
-
 const PREFIX = ['!mafia']; // We can create some sort of hashmap to store every alternate prefix for guilds.
-
+const interactionCommands: object[] = [];
 // We decide typescript's to initialize our client with it's states
 (client as ClientWithExtendedTypes).messageCommands = new Collection();
+(client as ClientWithExtendedTypes).interactionCommands = new Collection();
 
 // we need to read through all the events and the once which are once, init them, once which are on, init them.
 async function loadAllEvents(client: Client) {
@@ -54,14 +42,18 @@ async function loadAllEvents(client: Client) {
 }
 
 // This function would be used to load all our commands recursively.
-async function loadAllCommands(cmdDir: string) {
+async function loadAllCommands(cmdDir: string, type: 'message' | 'interaction' | 'any') {
   const commandDirectory = readdirSync(pathToFileURL(cmdDir), { withFileTypes: true });
 
   for (const command of commandDirectory) {
     const fullPath = pathToFileURL(path.join(cmdDir, command.name));
 
     if (command.isDirectory()) {
-      await loadAllCommands(path.join(cmdDir, command.name));
+      if (command.name.includes('interaction')) {
+        await loadAllCommands(path.join(cmdDir, command.name), 'interaction');
+        continue;
+      }
+      await loadAllCommands(path.join(cmdDir, command.name), 'message');
       continue;
     }
 
@@ -82,30 +74,38 @@ exec: ${execute ? 'defined' : 'undefined'}
       continue;
     }
 
-    (client as ClientWithExtendedTypes).messageCommands.set(name, {
-      description,
-      execute,
-    });
+    if (type === 'interaction') {
+      (client as ClientWithExtendedTypes).interactionCommands.set(name, {
+        description,
+        execute,
+      });
+      interactionCommands.push(obj.default);
+    } else {
+      (client as ClientWithExtendedTypes).messageCommands.set(name, { description, execute });
+    }
 
     console.log(`
 Command: ${name} was loaded successfully!
+Type: ${type} command
 Description: ${description}
       `);
   }
 }
 
 loadAllEvents(client).catch(console.error);
-loadAllCommands(path.join(__dirname, 'commands'))
+loadAllCommands(path.join(__dirname, 'commands'), 'any')
   .then((r) => r)
   .catch(console.error);
+
 const rest = new REST().setToken(botConfigs.env.bot.token);
 rest
   .put(Routes.applicationGuildCommands(botConfigs.env.bot.clientId, botConfigs.env.supportGuild.guildId), {
-    body: commands,
+    body: interactionCommands,
   })
   .catch((err) => {
     console.error(err);
   });
+
 client.login(botConfigs.env.bot.token).catch((err) => {
   console.error('Error occurred while signing in', err);
   console.log('Retrying in 30 seconds...');

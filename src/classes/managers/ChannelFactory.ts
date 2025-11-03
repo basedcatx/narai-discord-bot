@@ -1,8 +1,6 @@
-import { ChannelType, Client, TextChannel, ThreadChannel, VoiceChannel } from 'discord.js';
-import { ChannelManagerContract } from './contracts/ChannelManagerContract';
-import { TextChannelManager } from './TextChannelManager';
-import { ThreadChannelManager } from './ThreadChannelManager';
-import { VoiceChannelManager } from './VoiceChannelManager';
+import { Client, GuildChannel } from 'discord.js';
+import { IChannelManager } from './interfaces';
+import { ChannelManager } from './ChannelManager';
 
 /*
  * Finds a channel by ID and returns a specialized ChannelManagerContract Object wrapper, eg TextChannelManager
@@ -14,23 +12,10 @@ export class ChannelFactory {
   /*
    * @returns ChannelManagerContract | undefined
    */
-  public static fromId(channelId: string, client: Client): ChannelManagerContract | undefined {
+  public static fromId(channelId: string, client: Client): IChannelManager | undefined {
     const guildChannel = client.channels.cache.get(channelId);
     if (guildChannel == undefined) return undefined;
-
-    switch (guildChannel.type) {
-      case ChannelType.GuildText: {
-        return new TextChannelManager(guildChannel as TextChannel);
-      }
-
-      case ChannelType.PublicThread:
-      case ChannelType.PrivateThread: {
-        return new ThreadChannelManager(guildChannel as ThreadChannel);
-      }
-
-      case ChannelType.GuildVoice: {
-        return new VoiceChannelManager(guildChannel as VoiceChannel);
-      }
-    }
+    if (!(guildChannel instanceof GuildChannel)) return undefined;
+    return new ChannelManager(guildChannel);
   }
 }

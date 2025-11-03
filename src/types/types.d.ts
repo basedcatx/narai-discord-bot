@@ -13,7 +13,7 @@ interface GuildChannelConfig {
   [SETTINGS.GAME_THEME]: 'mafia';
 }
 
-interface MessageCommand {
+interface Command {
   description: string;
   execute(client: ClientWithExtendedTypes, msg: Message): Promise<void>;
 }
@@ -24,7 +24,8 @@ interface Event {
 }
 
 interface ClientWithExtendedTypes extends Client {
-  messageCommands: Collection<string, MessageCommand>;
+  messageCommands: Collection<string, Command>;
+  interactionCommands: Collection<string, Command>;
   events: Collection<string, Event>;
 }
 
