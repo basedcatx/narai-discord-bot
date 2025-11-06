@@ -41,6 +41,7 @@ async function loadAllEvents(client: Client) {
   }
 }
 
+
 // This function would be used to load all our commands recursively.
 async function loadAllCommands(cmdDir: string, type: 'message' | 'interaction' | 'any') {
   const commandDirectory = readdirSync(pathToFileURL(cmdDir), { withFileTypes: true });
@@ -92,10 +93,8 @@ Description: ${description}
   }
 }
 
-loadAllEvents(client).catch(console.error);
-loadAllCommands(path.join(__dirname, 'commands'), 'any')
-  .then((r) => r)
-  .catch(console.error);
+await loadAllEvents(client).catch(console.error);
+await loadAllCommands(path.join(__dirname, 'commands'), 'any');
 
 const rest = new REST().setToken(botConfigs.env.bot.token);
 rest

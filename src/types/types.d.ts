@@ -1,6 +1,6 @@
-import { Client, Collection, Interaction, Message } from 'discord.js';
-import { SETTINGS } from '../constants/constants';
-
+import { Client, Collection, CommandInteraction, Message } from 'discord.js';
+import { GameManager, LobbyManager } from '../classes/game/GameManager';
+import { PlayerManager } from '../classes/game/PlayerManager';
 interface GuildChannelConfig {
   [SETTINGS.ADMIN_ROLES]: string[];
   [SETTINGS.MIN_PLAYERS]: number;
@@ -15,18 +15,21 @@ interface GuildChannelConfig {
 
 interface Command {
   description: string;
-  execute(client: ClientWithExtendedTypes, msg: Message): Promise<void>;
+  execute(client: ClientWithExtendedTypes, interaction: Message | CommandInteraction): Promise<void>;
 }
 
 interface Event {
   once: boolean;
-  execute(client: ClientWithExtendedTypes, interaction: Message | Interaction): Promise<void>;
+  execute(client: ClientWithExtendedTypes, interaction: Message | CommandInteraction): Promise<void>;
 }
 
 interface ClientWithExtendedTypes extends Client {
   messageCommands: Collection<string, Command>;
   interactionCommands: Collection<string, Command>;
   events: Collection<string, Event>;
+  gameManagers: Collection<string, GameManager>;
+  lobbyManagers: Collection<string, LobbyManager>;
+  playerManagers: Collection<string, PlayerManager>;
 }
 
 export type GAME_ROLES_TYPE = 'doctor' | 'town member' | 'criminal';
